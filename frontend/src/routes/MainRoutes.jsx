@@ -1,58 +1,67 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import AuthContextProvider from '../contexts/AuthContextProvider'; 
+import ReactDOM from 'react-dom';
+import { createBrowserRouter, RouterProvider, Route, Navigate } from 'react-router-dom';
+import AuthContextProvider, { useAuth } from '../contexts/AuthContextProvider';
 
-import EmailList from "../pages/EmailList";
-import EmailDetail from "../pages/EmailDetail";
+import EmailList from "../pages/Archive.jsx";
+import EmailDetail from "../pages/Inbox.jsx";
 import ComposeEmail from "../pages/ComposeEmail.jsx";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
 import NotFound from "../pages/NotFound";
-import {
-  useAuth,
-} from "../contexts/AuthContextProvider.jsx";
 
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated } = useAuth(); 
+  const { isAuthenticated } = useAuth();
   return isAuthenticated ? children : <Navigate to="/login" />;
 };
 
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Navigate to="/c/inbox" replace />,
+  },
+  {
+    path: "/c/:emailCategory",
+    element: (
+      <ProtectedRoute>
+        <EmailList />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/c/:emailCategory/:emailId",
+    element: (
+      <ProtectedRoute>
+        <EmailDetail />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/compose",
+    element: (
+      <ProtectedRoute>
+        <ComposeEmail />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/login",
+    element: <Login />,
+  },
+  {
+    path: "/register",
+    element: <Register />,
+  },
+  {
+    path: "*",
+    element: <NotFound />,
+  },
+]);
 
 const MainRoutes = () => {
   return (
     <AuthContextProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Navigate to="/c/inbox" />} />
-          <Route
-            path="/c/:emailCategory"
-            element={
-              <ProtectedRoute>
-                <EmailList />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/c/:emailCategory/:emailId"
-            element={
-              <ProtectedRoute>
-                <EmailDetail />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/compose"
-            element={
-              <ProtectedRoute>
-                <ComposeEmail />
-              </ProtectedRoute>
-            }
-          />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </Router>
+      <RouterProvider router={router} />
     </AuthContextProvider>
   );
 };

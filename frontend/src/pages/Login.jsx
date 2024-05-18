@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Formik, Field, Form, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { AuthContext } from '../contexts/AuthContextProvider'; 
 
 const Login = () => {
   const navigate = useNavigate();
+  const { setAuthenticated } = useContext(AuthContext); 
 
   const validationSchema = Yup.object({
     email: Yup.string().email('Invalid email').required('Email is required'),
@@ -15,6 +17,7 @@ const Login = () => {
   const handleSubmit = async (values, { setSubmitting, setErrors }) => {
     try {
       const response = await axios.post('/user/login', values);
+      setAuthenticated(true); 
       navigate('/c/inbox');
     } catch (error) {
       setErrors({ general: 'Invalid email or password' });
@@ -64,4 +67,3 @@ const Login = () => {
 };
 
 export default Login;
-

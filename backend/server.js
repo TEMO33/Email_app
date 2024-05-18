@@ -1,17 +1,12 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');
-const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 
 const app = express();
-
-app.use(cors());
 app.use(express.json()); 
 app.use(express.urlencoded({ extended: true })); 
-app.use(cookieParser());
 
 app.use(
   session({
@@ -19,7 +14,10 @@ app.use(
     resave: false,
     saveUninitialized: false,
     store: new MongoStore({ mongoUrl: process.env.MONGO_URI }),
-    cookie: { secure: false }, 
+    cookie: {
+      secure: false, 
+      maxAge: 7 * 24 * 60 * 60 * 1000 
+    }
   })
 );
 

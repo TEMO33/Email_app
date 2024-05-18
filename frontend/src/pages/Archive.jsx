@@ -49,7 +49,7 @@ const Archived = () => {
       <h1>Archived</h1>
       <ul>
         {emails.map((email) => (
-          <li key={email._id} >
+          <li key={email._id}>
             <p>From: {email.sender.email}</p>
             <p>To: {email.recipients.map((recipient) => recipient.email).join(', ')}</p>
             <p>Time: {new Date(email.sentAt).toLocaleString()}</p>
