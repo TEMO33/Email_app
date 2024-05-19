@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import axiosInstance from './axiosInstance';
 
 const Archived = () => {
   const [emails, setEmails] = useState([]);
@@ -10,7 +10,7 @@ const Archived = () => {
   useEffect(() => {
     const fetchEmails = async () => {
       try {
-        const response = await axios.get('/email/c/archived'); 
+        const response = await axiosInstance.get('/email/c/archived'); 
         setEmails(response.data);
       } catch (error) {
         console.error(error);
@@ -22,10 +22,12 @@ const Archived = () => {
     fetchEmails();
   }, []);
 
-  const handleUnarchive = async (emailId) => {
+  const handleToggleArchive = async (emailId, currentStatus) => {
     try {
-      await axios.patch(`/email/${emailId}`, { archived: false });
-      setEmails(emails.filter((email) => email._id !== emailId));
+      await axiosInstance.patch(`/email/${emailId}`, { archived: !currentStatus });
+      setEmails(emails.map((email) =>
+        email._id === emailId ? { ...email, archived: !currentStatus } : email
+      ));
     } catch (error) {
       console.error(error);
     }
@@ -33,7 +35,7 @@ const Archived = () => {
 
   const handleDelete = async (emailId) => {
     try {
-      await axios.delete(`/email/${emailId}`);
+      await axiosInstance.delete(`/email/${emailId}`);
       setEmails(emails.filter((email) => email._id !== emailId));
     } catch (error) {
       console.error(error);
@@ -49,14 +51,16 @@ const Archived = () => {
       <h1>Archived</h1>
       <ul>
         {emails.map((email) => (
-          <li key={email._id}>
+          <li key={email._id} >
             <p>From: {email.sender.email}</p>
             <p>To: {email.recipients.map((recipient) => recipient.email).join(', ')}</p>
             <p>Time: {new Date(email.sentAt).toLocaleString()}</p>
             <p>{email.subject}</p>
             <div>
               <Link to={`/c/archived/${email._id}`}>Reply</Link>
-              <button onClick={() => handleUnarchive(email._id)}>Unarchive</button>
+              <button onClick={() => handleToggleArchive(email._id, email.archived)}>
+                {email.archived ? 'Unarchive' : 'Archive'}
+              </button>
               <button onClick={() => handleDelete(email._id)}>Delete</button>
             </div>
           </li>

@@ -15,6 +15,7 @@ const emailSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true,
+    maxlength: 255,
   },
   body: {
     type: String,
